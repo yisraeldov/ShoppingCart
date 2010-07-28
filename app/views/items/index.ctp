@@ -1,26 +1,51 @@
 <?PHP
+echo $this->Html->css('item');
 echo $javascript->link('prototype');
-echo $javascript->link('scriptaculous');
-echo $javascript->link('builder');
-echo $javascript->link('effects');
-echo $javascript->link('controls');
-echo $javascript->link('dragdrop');
+//add fancy stuff if we aren't in wap
+
+if(!$isMobile){
+    echo $javascript->link('scriptaculous');
+    echo $javascript->link('builder');
+    echo $javascript->link('effects');
+    echo $javascript->link('controls');
+    echo $javascript->link('dragdrop');
+    echo $javascript->link('item_advanced');
+}
+else{
+    echo "MOBILE!!" ;
+    echo $javascript->link('itemMobile');
+    echo $this->Html->css('itemMobile');
+}
+echo $javascript->link('items');
 
 
 ?>
+
+<div id=stats>
+    ...
+</div>
+<?php 
+ echo $ajax->remoteTimer(
+	array(
+	'url' => array( 'controller' => 'items', 'action' => 'stats' ),
+	'update' => 'stats',
+	'frequency' => 120
+	)
+);
+?>
 <div class="items index">
 	<h2><?php __('Items');?></h2>
-	<table cellpadding="0" cellspacing="0" id="items">
-	<tr>
-			<th><?php echo $this->Paginator->sort('id');?></th>
-			<th><?php echo $this->Paginator->sort('name');?></th>
-			<th><?php echo $this->Paginator->sort('quantity');?></th>
-			<th><?php echo $this->Paginator->sort('price');?></th>
-			<th><?php echo $this->Paginator->sort('created');?></th>
-			<th><?php echo $this->Paginator->sort('modified');?></th>
-			<th><?php echo $this->Paginator->sort('bought');?></th>
-			<th class="actions"><?php __('Actions');?></th>
-	</tr>
+	<div cellpadding="0" cellspacing="0" id="items">
+	<div>
+			<span><?php echo $this->Paginator->sort('id');?></span>
+			<span><?php echo $this->Paginator->sort('name');?></span>
+			<span><?php echo $this->Paginator->sort('quantity');?></span>
+			<span><?php echo $this->Paginator->sort('price');?></span>
+			<span><?php echo $this->Paginator->sort('created');?></span>
+			<span><?php echo $this->Paginator->sort('modified');?></span>
+			<span><?php echo $this->Paginator->sort('bought');?></span>
+			<span class="actions"><?php __('Actions');?></span>
+	</div>
 	<?php
 	$i = 0;
 	foreach ($items as $item):
@@ -30,31 +55,39 @@ echo $javascript->link('dragdrop');
 		}
 	?>
 
+    <?php echo $this->element('itemDiv', array('item'=>$item,'class'=>$class)) ?>
 
-	<?php 
-	$formId = 'Item'. $item['Item']['id']; 
-	
+	<?php endforeach; ?>
+	<?php $form->data=null;?>
+    </div>
+	<?php if (!$isMobile): ?>
+	<div id='newItem'>	
+
+	<?PHP
+	echo $ajax->form('add','post',array('model'=>'Item','update'=>'items','position'=>'bottom'));
+//	echo $form->create();
+	echo $form->input('name');
+	echo $form->input('quantity',array('default'=>1));
+	echo $form->input('price',array('default'=>1));
+	echo $form->submit('New item');
+
+	echo $form->end();
 	?>
-	<tr<?php echo $class;?>>
-		<td><?php echo $form->create('Item',array('id'=>$formId)); echo $item['Item']['id']; ?>&nbsp;</td>
-		<td><?php echo $item['Item']['name']; ?>&nbsp;</td>
-		<td><?php echo $item['Item']['quantity']; ?>&nbsp;</td>
-		<td><?php echo $item['Item']['price']; ?>&nbsp;<?PHP echo $this->Form->input('price')?></td>
-		<td><?php echo $item['Item']['created']; ?>&nbsp;</td>
-		<td><?php echo $item['Item']['modified']; ?>&nbsp;</td>
-		<td><?php echo $item['Item']['bought']; ?>&nbsp;<?PHP echo $this->Form->input('bought')?> </td>
-		<?php echo $form->end();?>
-		<?php echo $this->Ajax->observeForm($formId,array(        'url' => array( 'action' => 'edit' ),        'frequency' => 0.2,    ) );?>
-		<td class="actions">
-			<?php echo $this->Html->link(__('View', true), array('action' => 'view', $item['Item']['id'])); ?>
-			<?php echo $this->Html->link(__('Edit', true), array('action' => 'edit', $item['Item']['id'])); ?>
-			<?php echo $this->Ajax->link(__('Done', true), array('action' => 'bought', $item['Item']['id'])); ?>
-			<?php echo $this->Html->link(__('Delete', true), array('action' => 'delete', $item['Item']['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $item['Item']['id'])); ?>
-		</td>
-	</tr>
-<?php endforeach; ?>
-	</table>
-	<?PHP echo $this->Ajax->sortable('items',array()) ;?>
+	</div>
+	
+	<div id='avg_items'>
+	Loading ...
+	</div>
+	
+	<!--
+	   TODO Make the sorting actually do something
+	-->
+	<?PHP echo $this->Ajax->sortable('items',array('tag'=>'div')) ;?>
+	<script>
+	<?PHP echo $this->Ajax->remoteFunction(array('url'=>array('action'=>'average'),'update'=>'avg_items','evalScripts'=>true));?>
+	</script>
+	<?PHP echo $this->Ajax->drop('items',array('hoverclass'=>'hover','onDrop'=>'dropItemUpdateForm'))?>
+	<?php endif; ?>	
 	<p>
 	<?php
 	echo $this->Paginator->counter(array(
@@ -69,6 +102,8 @@ echo $javascript->link('dragdrop');
 		<?php echo $this->Paginator->next(__('next', true) . ' >>', array(), null, array('class' => 'disabled'));?>
 	</div>
 </div>
+
+
 <div class="actions">
 	<h3><?php __('Actions'); ?></h3>
 	<ul>

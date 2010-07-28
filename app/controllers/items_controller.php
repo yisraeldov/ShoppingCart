@@ -7,8 +7,17 @@ class ItemsController extends AppController {
 	var $name = 'Items';
 
 	function index() {
-		$this->Item->recursive = 0;
-		$this->set('items', $this->paginate());
+	    $isMobile = $this->RequestHandler->isMobile();
+	    //if($isMobile) echo "MOBILE!!" ;
+	    $this->set('isMobile',$isMobile);
+	    $this->Item->recursive = 0;
+
+	    $this->paginate = array(
+//		 'conditions' => array('item.bought' => array(0,null,"")),
+		 'conditions' =>array('OR'=>array( array('item.bought is null ' ) , array('item.bought = 0'))) , 
+		 'limit' => 100
+		 );
+	    $this->set('items', $this->paginate());
 	}
 
 	function view($id = null) {
@@ -19,12 +28,42 @@ class ItemsController extends AppController {
 		$this->set('item', $this->Item->read(null, $id));
 	}
 
+	function stats(){
+	    if($this->RequestHandler->isMobile()) $this->layout = 'ajax';
+	     $stats = $this->Item->query("select sum(quantity*price) as total from items where(modified > date('now'))  ;");
+	     $this->set('stats',$stats);
+	}
+
+	function average(){
+	     $limit = 100;
+	     $fields = array(
+		  'lower(Item.name) as name',
+		  'avg(item.quantity) as quantity',
+		  'avg(item.price) as price',
+		  'max(item.modified) as last_modified',
+		  'bought'
+		  );
+	     $groupby ='name';
+	     $this->paginate= array(
+		  'limit'=>$limit,
+		  'fields'=>$fields,
+		  'group' => $groupby,
+		  'order' => 'name',
+		  );
+	     $this->set('items', $this->paginate());
+	}
+
 	function add() {
 		if (!empty($this->data)) {
 			$this->Item->create();
-			if ($this->Item->save($this->data)) {
-				$this->Session->setFlash(__('The item has been saved', true));
-				$this->redirect(array('action' => 'index'));
+            if ($this->Item->save($this->data)) {
+                if(!$this->RequestHandler->getAjaxVersion()){
+                    $this->Session->setFlash(__('The item has been saved', true));
+                    $this->redirect(array('action' => 'index'));
+                }
+                else {
+                    $this->redirect(array('action'=>'view',$this->Item->id));
+                }
 			} else {
 				$this->Session->setFlash(__('The item could not be saved. Please, try again.', true));
 			}

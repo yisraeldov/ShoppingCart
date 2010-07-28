@@ -1,3 +1,7 @@
+<?php if ($this->Ajax->isAjax()): ?>
+    <?php echo $this->element('itemDiv', array('item'=>$item,'class'=>'')) ?>
+<?php else: ?>
+
 <div class="items view">
 <h2><?php  __('Item');?></h2>
 	<dl><?php $i = 0; $class = ' class="altrow"';?>
@@ -47,3 +51,4 @@
 		<li><?php echo $this->Html->link(__('New Item', true), array('action' => 'add')); ?> </li>
 	</ul>
 </div>
+<?php endif ?>

@@ -82,6 +82,7 @@ echo $javascript->link('items');
 	<!--
 	   TODO Make the sorting actually do something
 	-->
+	<?PHP echo $this->Ajax->drag('avg_items',array('revert'=>false)) ;?>
 	<?PHP echo $this->Ajax->sortable('items',array('tag'=>'div')) ;?>
 	<script>
 	<?PHP echo $this->Ajax->remoteFunction(array('url'=>array('action'=>'average'),'update'=>'avg_items','evalScripts'=>true));?>

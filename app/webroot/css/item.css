@@ -13,6 +13,11 @@ body{
     -webkit-border-radius: 2px;
 }
 
+#avg_items{
+	position:absolute;
+	dispaly:inline-block;
+	
+}
 .hover{
 
 	border:solid grey 3px;

@@ -1,4 +1,10 @@
 <?php
+/**
+ * The controller for the items
+ *
+ * @package default
+ * @author ישראל דוב לבו
+ */
 class ItemsController extends AppController {
 
     var $helpers = array('Html','Ajax','Javascript','Form');    
@@ -7,11 +13,14 @@ class ItemsController extends AppController {
     var $name = 'Items';
 
     function index() {
+
+        //detect mobile platform
         $isMobile = $this->RequestHandler->isMobile();
         //if($isMobile) echo "MOBILE!!" ;
         $this->set('isMobile',$isMobile);
         $this->Item->recursive = 0;
 
+        // load the items that are still to buy
         $this->paginate = array(
             //		 'conditions' => array('item.bought' => array(0,null,"")),
         'conditions' =>array('OR'=>array( array('item.bought is null ' ) , array('item.bought = 0'))) , 
@@ -28,12 +37,24 @@ class ItemsController extends AppController {
         $this->set('item', $this->Item->read(null, $id));
     }
 
+    /**
+     * Calculate some stats
+     *
+     * @return void
+     * @author ישראל דוב לבו
+     */
     function stats(){
         if($this->RequestHandler->isMobile()) $this->layout = 'ajax';
         $stats = $this->Item->query("select sum(quantity*price) as total from items where(modified > date('now'))  ;");
         $this->set('stats',$stats);
     }
 
+    /**
+     * Loads a list of previously purchased items and their average price
+     *
+     * @return void
+     * @author ישראל דוב לבו
+     */
     function average(){
         $limit = 100;
         $fields = array(
@@ -53,6 +74,13 @@ class ItemsController extends AppController {
         $this->set('items', $this->paginate());
     }
 
+
+    /**
+     * Add an item.
+     *
+     * @return void
+     * @author ישראל דוב לבו
+     */
     function add() {
         if (!empty($this->data)) {
             $this->Item->create();
@@ -70,6 +98,13 @@ class ItemsController extends AppController {
         }
     }
 
+    /**
+     * Edit an item
+     *
+     * @param int $id the item id to edit 
+     * @return void
+     * @author ישראל דוב לבו
+     */
     function edit($id = null) {
         if (!$id && empty($this->data)) {
             $this->Session->setFlash(__('Invalid item', true));
@@ -88,6 +123,14 @@ class ItemsController extends AppController {
         }
     }
 
+
+    /**
+     * Marks and item as bought
+     *
+     * @param int $id the item id to mark as bought
+     * @return void
+     * @author ישראל דוב לבו
+     */
     function bought($id = null){
 
         if (!$id && empty($this->data)) {
@@ -104,6 +147,13 @@ class ItemsController extends AppController {
         }
     }
 
+    /**
+     * Delete an item
+     *
+     * @param int $id the item id to delete
+     * @return void
+     * @author ישראל דוב לבו
+     */
     function delete($id = null) {
         if (!$id) {
             $this->Session->setFlash(__('Invalid id for item', true));
@@ -117,4 +167,4 @@ class ItemsController extends AppController {
         $this->redirect(array('action' => 'index'));
     }
 }
-?>
+

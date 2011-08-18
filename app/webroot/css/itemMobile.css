@@ -1,0 +1,28 @@
+
+
+body, input, html, div, form {
+	margin:0px;
+	-webkit-text-size-adjust:none;
+}
+input{
+	font-size:6pt;
+}
+
+
+#items input[type="checkbox"]{
+	font-size:12pt;
+	/*-webkit-transform: scale(1.5, 1.5);*/
+}
+.cake-sql-log{
+	display:none;
+}
+@media screen and (max-width: 320px)
+{
+	span.actions{
+	    display:none;
+	}
+	div.item{
+		font-size:12pt;
+	}	
+}
+ 
